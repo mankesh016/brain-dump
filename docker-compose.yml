@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: brain-dump-db
+    environment:
+      POSTGRES_USER: brain_user
+      POSTGRES_PASSWORD: brain_password
+      POSTGRES_DB: brain_dump
+    ports:
+      - "5432:5432"
+    volumes:
+      - brain-dump-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  brain-dump-data:
