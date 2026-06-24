@@ -12,4 +12,10 @@ docker compose up -d
 # if not works docker compose down -v, then again try
 
 npx prisma migrate dev --name init
+
+npm install @prisma/adapter-pg pg @types/pg
+
+prisma migrate reset
+npx prisma migrate dev --name init
+npx prisma generate
 ```
