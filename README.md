@@ -1,27 +1,15 @@
 # Brain Dump
 
-setup commands
+Commands to run locally!
 
 ```bash
-npx create-next-app@latest brain-dump
-
-npm install prisma @prisma/client
-npx prisma init
-
+git clone <repo_url>
+npm install
+# config .env file
 docker compose up -d
-# if not works docker compose down -v, then again try
-
-npx prisma migrate dev --name init
-
-npm install @prisma/adapter-pg pg @types/pg
-
-prisma migrate reset
-npx prisma migrate dev --name init
+npx prisma migrate dev
 npx prisma generate
-
-
 npx prisma db seed
 
-npm run build # to catch errors
-npm run dev
+npn run dev
 ```
