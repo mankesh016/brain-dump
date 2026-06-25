@@ -21,4 +21,7 @@ npx prisma generate
 
 
 npx prisma db seed
+
+npm run build # to catch errors
+npm run dev
 ```

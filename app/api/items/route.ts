@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
 
   const item = await db.item.create({
     data: {
-      user: DEV_USER_ID,
+      userId: DEV_USER_ID,
       type: body.type,
       title: body.title,
       content: body.content || null,
