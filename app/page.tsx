@@ -1,9 +1,11 @@
 "use client";
 import axios from "axios";
+import { ExternalLink } from "lucide-react";
 import { useState, useEffect, use } from "react";
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
+  const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [type, setType] = useState("NOTE");
@@ -13,6 +15,44 @@ export default function Home() {
   const [searchType, setSearchType] = useState<"keyword" | "semantic">(
     "keyword",
   );
+  const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
+  const [metaError, setMetaError] = useState("");
+
+  function detectType(urlStr: string): string {
+    if (!urlStr) return "NOTE";
+    if (urlStr.includes("youtube.com") || urlStr.includes("youtu.be"))
+      return "YOUTUBE";
+    if (urlStr.includes("twitter.com") || urlStr.includes("x.com"))
+      return "TWITTER";
+    if (urlStr.includes("linkedin.com")) return "LINKEDIN";
+    return "WEBLINK";
+  }
+  function handleUrlChange(val: string) {
+    setUrl(val);
+    const detected = detectType(val);
+    setType(detected);
+  }
+
+  async function generateTitle() {
+    if (!url.trim()) return;
+    setIsGeneratingTitle(true);
+    setMetaError("");
+    try {
+      const res = await axios.get(
+        `/api/meta?url=${encodeURIComponent(url.trim())}`,
+      );
+      if (res.data.title) {
+        setTitle(res.data.title);
+      } else {
+        setMetaError("Could not fetch title");
+      }
+    } catch (err) {
+      console.error(err);
+      setMetaError("Could not fetch title");
+    } finally {
+      setIsGeneratingTitle(false);
+    }
+  }
 
   async function search() {
     if (!query) {
@@ -43,11 +83,20 @@ export default function Home() {
   }, []);
 
   async function addItem() {
-    if (!title) return;
+    if (!url.trim() && !title.trim() && !content.trim()) return;
+
     try {
-      await axios.post("/api/items", { title, content, type });
+      await axios.post("/api/items", {
+        title: title.trim(),
+        content: content.trim() || null,
+        type,
+        url: url.trim() || null,
+      });
       setTitle("");
       setContent("");
+      setUrl("");
+      setType("NOTE");
+      setMetaError("");
       await fetchItems();
     } catch (error) {
       console.error("Error adding item:", error);
@@ -58,7 +107,10 @@ export default function Home() {
     YOUTUBE: "bg-red-100 text-red-850 border-red-200",
     WEBLINK: "bg-green-100 text-green-850 border-green-200",
     TWITTER: "bg-sky-100 text-sky-850 border-sky-200",
+    LINKEDIN: "bg-blue-100 text-blue-850 border-blue-200",
   };
+
+  const canSubmit = !!(url.trim() || title.trim() || content.trim());
 
   return (
     <main className="max-w-xl mx-auto p-6">
@@ -66,6 +118,15 @@ export default function Home() {
 
       {/* Add Item Form */}
       <div className="border border-gray-300 rounded p-4 mb-6 flex flex-col gap-3">
+        {/* 1. URL Input */}
+        <input
+          value={url}
+          onChange={(e) => handleUrlChange(e.target.value)}
+          placeholder="URL"
+          className="p-2 border border-gray-300 rounded"
+        />
+
+        {/* 2. Title Input & Generate Title Button */}
         <div className="flex gap-2">
           <input
             value={title}
@@ -73,6 +134,27 @@ export default function Home() {
             placeholder="Title"
             className="flex-1 p-2 border border-gray-300 rounded"
           />
+          <button
+            type="button"
+            onClick={generateTitle}
+            disabled={!url.trim() || isGeneratingTitle}
+            className="bg-gray-200 text-gray-700 p-2 rounded text-sm px-3 disabled:opacity-50"
+          >
+            {isGeneratingTitle ? "Fetching..." : "Generate Title"}
+          </button>
+        </div>
+
+        {/* 3. Content Textarea */}
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Write content..."
+          rows={3}
+          className="p-2 border border-gray-300 rounded"
+        />
+
+        {/* 4. Type selector, Add Item Button */}
+        <div className="flex justify-between items-center gap-2 mt-2">
           <select
             value={type}
             onChange={(e) => setType(e.target.value)}
@@ -82,23 +164,17 @@ export default function Home() {
             <option>YOUTUBE</option>
             <option>WEBLINK</option>
             <option>TWITTER</option>
+            <option>LINKEDIN</option>
           </select>
+
+          <button
+            onClick={addItem}
+            disabled={!canSubmit}
+            className="bg-gray-800 text-white p-2 rounded px-4 disabled:opacity-50 text-sm"
+          >
+            Add Item
+          </button>
         </div>
-
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Write content..."
-          rows={3}
-          className="p-2 border border-gray-300 rounded"
-        />
-
-        <button
-          onClick={addItem}
-          className="bg-gray-800 text-white p-2 rounded self-end px-4"
-        >
-          Add Item
-        </button>
       </div>
 
       <hr className="border-gray-300 mb-6" />
@@ -155,8 +231,21 @@ export default function Home() {
       <div className="flex flex-col gap-3">
         {(searchResults ?? items).map((item) => (
           <div key={item.id} className="border border-gray-300 rounded p-4">
-            <div className="flex items-center justify-between">
-              <strong className="text-lg">{item.title}</strong>
+            <div className="flex items-start justify-between gap-4">
+              <strong className="text-lg font-bold leading-snug">
+                {item.title}
+                {item.url && (
+                  <a
+                    href={item.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-blue-600 transition-colors inline-flex items-center ml-2"
+                    title={item.url}
+                  >
+                    <ExternalLink size={16} />
+                  </a>
+                )}
+              </strong>
               <span
                 className={
                   "text-xs px-2 py-0.5 rounded border bg-gray-100 text-gray-850 border-gray-200"
