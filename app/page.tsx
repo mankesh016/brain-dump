@@ -1,12 +1,30 @@
 "use client";
 import axios from "axios";
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 
 export default function Home() {
   const [items, setItems] = useState<any[]>([]);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [type, setType] = useState("NOTE");
+  const [query, setQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[] | null>(null);
+  const [latency, setLatency] = useState<number | null>(null);
+
+  async function search() {
+    if (!query) {
+      setSearchResults(null);
+      setLatency(null);
+      return;
+    }
+    try {
+      const res = await axios.get(`/api/search?q=${query}`);
+      setSearchResults(res.data.results);
+      setLatency(res.data.latencyMs);
+    } catch (err) {
+      console.error("Error searching items:", err);
+    }
+  }
 
   const fetchItems = async () => {
     try {
@@ -82,9 +100,33 @@ export default function Home() {
 
       <hr className="border-gray-300 mb-6" />
 
+      {/* Search bar */}
+      <div className="flex gap-2 flex-col mb-6">
+        <div className="flex gap-2 items-center mb-2">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="search..."
+            className="flex-1 p-2 border border-gray-300 rounded"
+          />
+          <button
+            onClick={search}
+            className="bg-gray-800 text-white p-2 rounded px-4"
+          >
+            Search
+          </button>
+        </div>
+
+        {latency !== null && (
+          <span className="text-xs text-gray-500">
+            (searched in {latency}ms)
+          </span>
+        )}
+      </div>
+
       {/* Items List */}
       <div className="flex flex-col gap-3">
-        {items.map((item) => (
+        {(searchResults ?? items).map((item) => (
           <div key={item.id} className="border border-gray-300 rounded p-4">
             <div className="flex items-center justify-between">
               <strong className="text-lg">{item.title}</strong>
