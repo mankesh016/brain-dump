@@ -18,4 +18,7 @@ npm install @prisma/adapter-pg pg @types/pg
 prisma migrate reset
 npx prisma migrate dev --name init
 npx prisma generate
+
+
+npx prisma db seed
 ```
