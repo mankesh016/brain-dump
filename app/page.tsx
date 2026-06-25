@@ -10,6 +10,9 @@ export default function Home() {
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[] | null>(null);
   const [latency, setLatency] = useState<number | null>(null);
+  const [searchType, setSearchType] = useState<"keyword" | "semantic">(
+    "keyword",
+  );
 
   async function search() {
     if (!query) {
@@ -18,7 +21,7 @@ export default function Home() {
       return;
     }
     try {
-      const res = await axios.get(`/api/search?q=${query}`);
+      const res = await axios.get(`/api/search?q=${query}&type=${searchType}`);
       setSearchResults(res.data.results);
       setLatency(res.data.latencyMs);
     } catch (err) {
@@ -114,6 +117,30 @@ export default function Home() {
             className="bg-gray-800 text-white p-2 rounded px-4"
           >
             Search
+          </button>
+        </div>
+
+        {/* Search type toggles */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setSearchType("keyword")}
+            className={`text-xs px-3 py-1.5 rounded border ${
+              searchType === "keyword"
+                ? "bg-gray-800 text-white border-gray-850"
+                : "bg-white text-gray-700 border-gray-300"
+            }`}
+          >
+            Keyword
+          </button>
+          <button
+            onClick={() => setSearchType("semantic")}
+            className={`text-xs px-3 py-1.5 rounded border ${
+              searchType === "semantic"
+                ? "bg-gray-800 text-white border-gray-850"
+                : "bg-white text-gray-700 border-gray-300"
+            }`}
+          >
+            Semantic
           </button>
         </div>
 
