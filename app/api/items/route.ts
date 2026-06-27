@@ -8,6 +8,13 @@ export async function GET() {
   const items = await db.item.findMany({
     where: { userId: DEV_USER_ID },
     orderBy: { createdAt: "desc" },
+    include: {
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
+    },
   });
   return NextResponse.json(items);
 }
@@ -16,13 +23,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const { tags = [] } = body;
 
-  const uniqueTags = Array.from(
-    new Set(
-      (tags as string[])
-        .map((name) => name.toLowerCase().trim())
-        .filter(Boolean),
-    ),
-  );
+  const uniqueTags = Array.from(new Set((tags as string[]).map((name) => name.toLowerCase().trim()).filter(Boolean)));
 
   const item = await db.item.create({
     data: {
@@ -56,9 +57,7 @@ export async function POST(req: NextRequest) {
   const baseUrl = `${protocol}://${host}`;
 
   // no await
-  axios
-    .post(`${baseUrl}/api/embed`, { itemId: item.id })
-    .catch((err) => console.error("embed failed:", err));
+  axios.post(`${baseUrl}/api/embed`, { itemId: item.id }).catch((err) => console.error("embed failed:", err));
 
   return NextResponse.json(item);
 }

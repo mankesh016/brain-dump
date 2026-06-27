@@ -39,12 +39,7 @@ export async function GET(req: NextRequest) {
     });
 
     const results = items
-      .filter(
-        (item) =>
-          item.embedding &&
-          item.embedding.vector &&
-          item.embedding.vector.length > 0,
-      )
+      .filter((item) => item.embedding && item.embedding.vector && item.embedding.vector.length > 0)
       .map((item) => {
         const similarity = cosineSimilarity(queryVec, item.embedding!.vector);
         return {
@@ -67,10 +62,7 @@ export async function GET(req: NextRequest) {
   const results = await db.item.findMany({
     where: {
       userId: DEV_USER_ID,
-      OR: [
-        { title: { contains: q, mode: "insensitive" } },
-        { content: { contains: q, mode: "insensitive" } },
-      ],
+      OR: [{ title: { contains: q, mode: "insensitive" } }, { content: { contains: q, mode: "insensitive" } }],
     },
     include: {
       tags: {
@@ -83,9 +75,7 @@ export async function GET(req: NextRequest) {
   });
 
   const latencyMs = Date.now() - start;
-  console.log(
-    `[search] keyword "${q}" → ${results.length} results in ${latencyMs}ms`,
-  );
+  console.log(`[search] keyword "${q}" → ${results.length} results in ${latencyMs}ms`);
 
   return NextResponse.json({ results, latencyMs });
 }

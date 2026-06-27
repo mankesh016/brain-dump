@@ -13,9 +13,7 @@ async function main() {
     },
   });
 
-  console.log(
-    `Seed completed. Dev user upserted: ${user.id} (${user.username})`,
-  );
+  console.log(`Seed completed. Dev user upserted: ${user.id} (${user.username})`);
 
   await db.$disconnect();
   process.exit(0);
