@@ -14,6 +14,15 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const body = await req.json();
+  const { tags = [] } = body;
+
+  const uniqueTags = Array.from(
+    new Set(
+      (tags as string[])
+        .map((name) => name.toLowerCase().trim())
+        .filter(Boolean),
+    ),
+  );
 
   const item = await db.item.create({
     data: {
@@ -22,6 +31,23 @@ export async function POST(req: NextRequest) {
       title: body.title,
       content: body.content || null,
       url: body.url || null,
+      tags: {
+        create: uniqueTags.map((name) => ({
+          tag: {
+            connectOrCreate: {
+              where: { name },
+              create: { name },
+            },
+          },
+        })),
+      },
+    },
+    include: {
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
     },
   });
 

@@ -5,10 +5,14 @@ import { embedText } from "@/lib/gemini";
 export async function POST(req: NextRequest) {
   const { itemId } = await req.json();
 
-  const item = await db.item.findUnique({ where: { id: itemId } });
+  const item = await db.item.findUnique({
+    where: { id: itemId },
+    include: { tags: { include: { tag: true } } },
+  });
   if (!item) return NextResponse.json({ error: "not found" }, { status: 404 });
 
-  const text = [item.title, item.content].filter(Boolean).join(". ");
+  const tagText = item.tags.map((t: any) => t.tag.name).join(", ");
+  const text = [item.title, item.content, tagText].filter(Boolean).join(". ");
   const vector = await embedText(text);
 
   await db.embedding.upsert({

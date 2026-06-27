@@ -8,6 +8,7 @@ export default function Home() {
   const [url, setUrl] = useState("");
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
   const [type, setType] = useState("NOTE");
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState<any[] | null>(null);
@@ -17,6 +18,7 @@ export default function Home() {
   );
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
   const [metaError, setMetaError] = useState("");
+  const [isGeneratingTags, setIsGeneratingTags] = useState(false);
 
   function detectType(urlStr: string): string {
     if (!urlStr) return "NOTE";
@@ -54,6 +56,25 @@ export default function Home() {
     }
   }
 
+  async function generateTags() {
+    if (!title.trim() && !content.trim()) return;
+    setIsGeneratingTags(true);
+    try {
+      const res = await axios.post("/api/tags/generate", {
+        title: title.trim(),
+        content: content.trim(),
+        url: url.trim(),
+      });
+      if (res.data.tags && res.data.tags.length > 0) {
+        setTags(res.data.tags.join(", "));
+      }
+    } catch (err) {
+      console.error("Failed to generate tags:", err);
+    } finally {
+      setIsGeneratingTags(false);
+    }
+  }
+
   async function search() {
     if (!query) {
       setSearchResults(null);
@@ -86,16 +107,23 @@ export default function Home() {
     if (!url.trim() && !title.trim() && !content.trim()) return;
 
     try {
+      const tagsArray = tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
       await axios.post("/api/items", {
         title: title.trim(),
         content: content.trim() || null,
         type,
         url: url.trim() || null,
+        tags: tagsArray,
       });
       setTitle("");
       setContent("");
       setUrl("");
       setType("NOTE");
+      setTags("");
       setMetaError("");
       await fetchItems();
     } catch (error) {
@@ -143,6 +171,7 @@ export default function Home() {
             {isGeneratingTitle ? "Fetching..." : "Generate Title"}
           </button>
         </div>
+        {metaError && <span className="text-xs text-red-500">{metaError}</span>}
 
         {/* 3. Content Textarea */}
         <textarea
@@ -153,7 +182,44 @@ export default function Home() {
           className="p-2 border border-gray-300 rounded"
         />
 
-        {/* 4. Type selector, Add Item Button */}
+        {/* 4. Tags Input & Generate Tags Button */}
+        <div className="flex gap-2">
+          <input
+            value={tags}
+            onChange={(e) => setTags(e.target.value)}
+            placeholder="Tags (comma separated)"
+            className="flex-1 p-2 border border-gray-300 rounded"
+          />
+          <button
+            type="button"
+            onClick={generateTags}
+            disabled={(!title.trim() && !content.trim()) || isGeneratingTags}
+            className="bg-gray-200 text-gray-700 p-2 rounded text-sm px-3 disabled:opacity-50"
+          >
+            {isGeneratingTags ? "Generating..." : "Generate Tags"}
+          </button>
+        </div>
+        {tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean).length > 0 && (
+          <div className="flex flex-wrap gap-1 mt-1">
+            {tags
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean)
+              .map((tag, idx) => (
+                <span
+                  key={idx}
+                  className="bg-gray-100 text-gray-600 text-xs px-2 py-0.5 rounded border border-gray-200"
+                >
+                  #{tag}
+                </span>
+              ))}
+          </div>
+        )}
+
+        {/* 5. Type selector, Add Item Button */}
         <div className="flex justify-between items-center gap-2 mt-2">
           <select
             value={type}
@@ -247,15 +313,28 @@ export default function Home() {
                 )}
               </strong>
               <span
-                className={
-                  "text-xs px-2 py-0.5 rounded border bg-gray-100 text-gray-850 border-gray-200"
-                }
+                className={`text-xs px-2 py-0.5 rounded border shrink-0 ${
+                  BADGE_STYLES[item.type] ||
+                  "bg-gray-100 text-gray-850 border-gray-200"
+                }`}
               >
                 {item.type}
               </span>
             </div>
             {item.content && (
               <p className="mt-2 text-gray-600 text-sm">{item.content}</p>
+            )}
+            {item.tags && item.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2.5">
+                {item.tags.map((t: any) => (
+                  <span
+                    key={t.tag.id || t.tag.name}
+                    className="text-xs bg-gray-100 text-gray-605 px-2 py-0.5 rounded border border-gray-200"
+                  >
+                    #{t.tag.name}
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         ))}

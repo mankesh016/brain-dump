@@ -28,7 +28,14 @@ export async function GET(req: NextRequest) {
 
     const items = await db.item.findMany({
       where: { userId: DEV_USER_ID },
-      include: { embedding: true },
+      include: {
+        embedding: true,
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+      },
     });
 
     const results = items
@@ -64,6 +71,13 @@ export async function GET(req: NextRequest) {
         { title: { contains: q, mode: "insensitive" } },
         { content: { contains: q, mode: "insensitive" } },
       ],
+    },
+    include: {
+      tags: {
+        include: {
+          tag: true,
+        },
+      },
     },
     orderBy: { updatedAt: "desc" },
   });
