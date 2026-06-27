@@ -3,10 +3,14 @@ import { ExternalLink, FileText, Pencil, Trash2 } from "lucide-react";
 
 interface ItemCardProps {
   item: any;
+  onEdit: (item: any) => void;
+  onDeleteTrigger: (id: string) => void;
 }
-export function ItemCard({ item }: ItemCardProps) {
+export function ItemCard({ item, onEdit, onDeleteTrigger }: ItemCardProps) {
   const theme = CARD_THEMES[item.type] || CARD_THEMES.NOTE;
   const CardIcon = SIDEBAR_ITEMS.find((s) => s.filter === item.type)?.icon || FileText;
+
+  const isEdited = new Date(item.updatedAt).getTime() - new Date(item.createdAt).getTime() > 60000;
 
   function formatDate(date: string) {
     return new Date(date).toLocaleDateString("en-GB"); // DD/MM/YYYY
@@ -38,12 +42,15 @@ export function ItemCard({ item }: ItemCardProps) {
           </strong>
         </div>
 
-        {/* Edit & Delete Action Placeholders */}
+        {/* Edit & Delete Action Buttons */}
         <div className="flex items-center gap-1.5 text-gray-400">
-          <button className="hover:text-gray-600 p-0.5 transition-colors">
+          <button onClick={() => onEdit(item)} className="hover:text-gray-600 p-0.5 transition-colors cursor-pointer">
             <Pencil size={14} />
           </button>
-          <button className="hover:text-red-600 p-0.5 transition-colors">
+          <button
+            onClick={() => onDeleteTrigger(item.id)}
+            className="hover:text-red-600 p-0.5 transition-colors cursor-pointer"
+          >
             <Trash2 size={14} />
           </button>
         </div>
@@ -80,6 +87,9 @@ export function ItemCard({ item }: ItemCardProps) {
       {/* Dates at bottom */}
       <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-100 text-[10px] text-gray-400 font-medium">
         <span>Added: {formatDate(item.createdAt)}</span>
+        {isEdited && (
+          <span className="text-blue-500 font-semibold tracking-normal">Edited: {formatDate(item.updatedAt)}</span>
+        )}
       </div>
     </div>
   );

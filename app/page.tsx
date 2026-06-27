@@ -1,5 +1,7 @@
 "use client";
 import { AddDialog } from "@/components/dashboard/AddDialog";
+import { DeleteDialog } from "@/components/dashboard/DeleteDialog";
+import { EditDialog } from "@/components/dashboard/EditDialog";
 import { ItemCard } from "@/components/dashboard/ItemCard";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -18,6 +20,29 @@ export default function Home() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [counts, setCounts] = useState<Record<string, number>>({
+    NOTE: 0,
+    YOUTUBE: 0,
+    TWITTER: 0,
+    LINKEDIN: 0,
+    SPOTIFY: 0,
+    WEBLINK: 0,
+    total: 0,
+  });
+
+  // Edit & Delete Selection states
+  const [editItem, setEditItem] = useState<any | null>(null);
+  const [deleteItemId, setDeleteItemId] = useState<string | null>(null);
+
+  const fetchCounts = async () => {
+    try {
+      const res = await axios.get("/api/items/counts");
+      setCounts(res.data);
+    } catch (err) {
+      console.error("Error fetching counts:", err);
+    }
+  };
 
   async function search() {
     if (!query.trim()) {
@@ -42,6 +67,7 @@ export default function Home() {
     try {
       const response = await axios.get("/api/items");
       setItems(response.data);
+      await fetchCounts();
     } catch (error) {
       console.error("Error fetching items:", error);
     } finally {
@@ -67,6 +93,21 @@ export default function Home() {
 
     return () => clearTimeout(delayDebounceFn);
   }, [query, searchType]);
+
+  async function deleteItem() {
+    if (!deleteItemId) return;
+    try {
+      await axios.delete(`/api/items/${deleteItemId}`);
+      setItems((prev) => prev.filter((item) => item.id !== deleteItemId));
+      if (searchResults) {
+        setSearchResults((prev) => (prev ? prev.filter((item) => item.id !== deleteItemId) : null));
+      }
+      setDeleteItemId(null);
+      await fetchCounts();
+    } catch (err) {
+      console.error("Error deleting item:", err);
+    }
+  }
 
   const displayedItems = (searchResults ?? items).filter((item) => {
     if (activeFilter === "all") return true;
@@ -108,18 +149,24 @@ export default function Home() {
           {SIDEBAR_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive = activeFilter === item.filter;
+            const countKey = item.filter === "all" ? "total" : item.filter;
+            const countVal = counts[countKey] ?? 0;
+
             return (
               <button
                 key={item.name}
                 onClick={() => setActiveFilter(item.filter)}
-                className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors text-left ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-left ${
                   isActive
                     ? "bg-blue-50 text-blue-600 font-semibold"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                <Icon size={18} className={isActive ? "text-blue-600" : "text-gray-400"} />
-                <span>{item.name}</span>
+                <div className="flex items-center gap-3">
+                  <Icon size={18} className={isActive ? "text-blue-600" : "text-gray-400"} />
+                  <span>{item.name}</span>
+                </div>
+                <span className={`text-xs ${isActive ? "text-blue-600 font-bold" : "text-gray-400"}`}>{countVal}</span>
               </button>
             );
           })}
@@ -202,12 +249,18 @@ export default function Home() {
           ) : (
             <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
               {displayedItems.map((item) => (
-                <ItemCard key={item.id} item={item} />
+                <ItemCard key={item.id} item={item} onEdit={setEditItem} onDeleteTrigger={setDeleteItemId} />
               ))}
             </div>
           )}
         </main>
       </div>
+
+      {/* 3. Edit Item Dialog Modal */}
+      <EditDialog item={editItem} onClose={() => setEditItem(null)} onEditSuccess={fetchItems} />
+
+      {/* 4. Delete Item AlertDialog */}
+      <DeleteDialog itemId={deleteItemId} onClose={() => setDeleteItemId(null)} onDeleteConfirm={deleteItem} />
     </div>
   );
 }
