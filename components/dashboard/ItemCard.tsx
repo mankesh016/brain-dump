@@ -1,6 +1,18 @@
 import { CARD_THEMES, SIDEBAR_ITEMS } from "@/lib/constants";
 import { ExternalLink, FileText, Pencil, Trash2 } from "lucide-react";
 
+function getYouTubeId(url: string): string | null {
+  const match = url.match(/(?:v=|youtu\.be\/)([^&\s?]+)/);
+  return match?.[1] ?? null;
+}
+
+function getHostname(url: string): string | null {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
 interface ItemCardProps {
   item: any;
   onEdit: (item: any) => void;
@@ -16,6 +28,11 @@ export function ItemCard({ item, onEdit, onDeleteTrigger }: ItemCardProps) {
     return new Date(date).toLocaleDateString("en-GB"); // DD/MM/YYYY
   }
 
+  const isYouTube = item.type === "YOUTUBE";
+  const videoId = isYouTube && item.url ? getYouTubeId(item.url) : null;
+  const thumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : null;
+  const hostname = !isYouTube && item.url ? getHostname(item.url) : null;
+
   return (
     <div
       key={item.id}
@@ -26,20 +43,7 @@ export function ItemCard({ item, onEdit, onDeleteTrigger }: ItemCardProps) {
           <div className={`p-1.5 rounded-lg ${theme.iconBg} ${theme.iconColor}`}>
             <CardIcon size={16} />
           </div>
-          <strong className="text-sm font-bold text-gray-800 leading-snug line-clamp-1">
-            {item.title}
-            {item.url && (
-              <a
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-600 transition-colors inline-flex items-center align-middle ml-1.5"
-                title={item.url}
-              >
-                <ExternalLink size={12} />
-              </a>
-            )}
-          </strong>
+          <strong className="text-sm font-bold text-gray-800 leading-snug line-clamp-1">{item.title}</strong>
         </div>
 
         {/* Edit & Delete Action Buttons */}
@@ -56,16 +60,31 @@ export function ItemCard({ item, onEdit, onDeleteTrigger }: ItemCardProps) {
         </div>
       </div>
 
-      {/* YouTube Video Thumbnail Preview (only if imageUrl is present in DB) */}
-      {item.type === "YOUTUBE" && item.imageUrl && (
+      {/* YouTube Video Thumbnail Preview */}
+      {thumbnailUrl && (
         <a
           href={item.url}
           target="_blank"
           rel="noopener noreferrer"
           className="relative rounded-lg overflow-hidden group cursor-pointer border border-gray-100 block"
         >
-          <img src={item.imageUrl} alt="YouTube Thumbnail" className="w-full h-auto object-cover" />
+          <img src={thumbnailUrl} alt="YouTube Thumbnail" className="w-full h-auto object-cover" />
         </a>
+      )}
+
+      {/* Hostname Link for other types */}
+      {hostname && (
+        <div className="flex">
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+          >
+            <ExternalLink size={11} className="text-gray-400" />
+            <span>{hostname}</span>
+          </a>
+        </div>
       )}
 
       {/* Content Preview */}
