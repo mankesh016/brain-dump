@@ -1,12 +1,20 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 const DEV_USER_ID = process.env.DEV_USER_ID!;
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+    const userId = (session.user as any).id;
+
     const items = await db.item.findMany({
-      where: { userId: DEV_USER_ID },
+      where: { userId },
       select: { type: true },
     });
 

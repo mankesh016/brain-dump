@@ -1,19 +1,19 @@
 import { db } from "../lib/db";
+import bcrypt from "bcryptjs";
 
 async function main() {
-  const devUserId = process.env.DEV_USER_ID || "dev-user-123";
+  const hashed = await bcrypt.hash("testpass", 12);
 
   const user = await db.user.upsert({
-    where: { id: devUserId },
+    where: { username: "testuser" },
     update: {},
     create: {
-      id: devUserId,
-      username: "devuser",
-      password: "devpassword",
+      username: "testuser",
+      password: hashed,
     },
   });
 
-  console.log(`Seed completed. Dev user upserted: ${user.id} (${user.username})`);
+  console.log(`Seed completed. Test user upserted: ${user.id} (${user.username})`);
 
   await db.$disconnect();
   process.exit(0);

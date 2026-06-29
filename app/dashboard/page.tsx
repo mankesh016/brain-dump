@@ -3,14 +3,17 @@ import { AddDialog } from "@/components/dashboard/AddDialog";
 import { DeleteDialog } from "@/components/dashboard/DeleteDialog";
 import { EditDialog } from "@/components/dashboard/EditDialog";
 import { ItemCard } from "@/components/dashboard/ItemCard";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import axios from "axios";
-import { Search } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
 export default function DashboardPage() {
+  const { data: session } = useSession();
   const [items, setItems] = useState<any[]>([]);
 
   const [query, setQuery] = useState("");
@@ -214,6 +217,19 @@ export default function DashboardPage() {
 
           {/* Action buttons */}
           <div className="flex items-center gap-2 shrink-0">
+            {/* Real Session user display */}
+            {session?.user?.name && (
+              <span className="text-xs font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-250/60">
+                {session.user.name}
+              </span>
+            )}
+            <Button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="text-xs font-bold text-red-650 hover:text-red-750 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5 h-fit shadow-none"
+            >
+              <LogOut size={13} />
+              <span>Sign Out</span>
+            </Button>
             {/* shadcn Dialog modal wrapper */}
             <AddDialog onAddSuccess={fetchItems} />
           </div>
