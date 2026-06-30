@@ -27,7 +27,7 @@ export async function GET() {
       SPOTIFY: 0,
     };
 
-    items.forEach((item) => {
+    items.forEach((item: any) => {
       if (item.type in counts) {
         counts[item.type]++;
       } else {
