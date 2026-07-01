@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import axios from "axios";
-import { Brain, LogOut, MoreVertical, Search, Sparkles, User } from "lucide-react";
+import { Brain, LogOut, Moon, MoreVertical, Search, Sparkles, Sun, User } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -29,8 +29,25 @@ export default function DashboardPage() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggleDarkMode = () => {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   useEffect(() => {
     if (searchParams.get("add") === "true") {
@@ -223,10 +240,29 @@ export default function DashboardPage() {
                 </button>
               </div>
             )}
+
+            {/* Dark Mode toggle sidebar item */}
+            <button
+              onClick={toggleDarkMode}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-left cursor-pointer mb-2 font-medium"
+            >
+              {isDark ? (
+                <>
+                  <Sun size={18} className="text-amber-500" />
+                  <span>Light mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon size={18} className="text-gray-500" />
+                  <span>Dark mode</span>
+                </>
+              )}
+            </button>
+
             <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-gray-50/70 transition-colors">
               <div className="flex items-center gap-2 min-w-0">
                 <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-150 flex items-center justify-center shrink-0">
-                  <User size={15} />
+                  <User size={15} className="text-indigo-500" />
                 </div>
                 <span className="text-xs font-bold text-gray-700 truncate max-w-28" title={session.user.name ?? ""}>
                   {session.user.name}

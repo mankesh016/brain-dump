@@ -2,7 +2,20 @@
 
 import axios from "axios";
 import Link from "next/link";
-import { Brain, ArrowRight, Search, Sparkles, Link2, Tag, FileText, Plus, LogOut, MoreVertical } from "lucide-react";
+import {
+  Brain,
+  ArrowRight,
+  Search,
+  Sparkles,
+  Link2,
+  Tag,
+  FileText,
+  Plus,
+  LogOut,
+  MoreVertical,
+  Sun,
+  Moon,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
@@ -49,7 +62,24 @@ export default function LandingPage() {
   const { data: session, status } = useSession();
   const [itemsCount, setItemsCount] = useState<number>(0);
   const [showHeaderUserMenu, setShowHeaderUserMenu] = useState(false);
+  const [isDark, setIsDark] = useState(false);
   const headerUserMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains("dark"));
+  }, []);
+
+  const toggleDarkMode = () => {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   useEffect(() => {
     if (status === "authenticated") {
@@ -92,69 +122,81 @@ export default function LandingPage() {
           <span className="font-extrabold text-lg text-gray-900 tracking-tight">Brain Dump</span>
         </Link>
 
-        {/* Auth Section in Header */}
-        <div className="flex items-center gap-3">
-          {isLoggedIn ? (
-            <div className="flex items-center gap-3 select-none">
-              <Button
-                asChild
-                variant="outline"
-                className="text-sm font-bold border-gray-250 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all h-fit cursor-pointer flex items-center gap-1.5"
-              >
-                <Link href="/dashboard">
-                  <span>Go to dashboard</span>
-                </Link>
-              </Button>
+        {/* Right Header Actions */}
+        <div className="flex items-center gap-3.5">
+          {/* Dark Mode Toggle Button */}
+          <button
+            onClick={toggleDarkMode}
+            className="p-2.5 rounded-xl border border-gray-250/70 bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer text-gray-500 hover:text-gray-800 shrink-0 flex items-center justify-center"
+            aria-label="Toggle dark mode"
+          >
+            {isDark ? <Sun size={17} className="text-amber-500" /> : <Moon size={17} />}
+          </button>
 
-              {/* User Dropdown */}
-              <div ref={headerUserMenuRef} className="relative">
-                <button
-                  onClick={() => setShowHeaderUserMenu(!showHeaderUserMenu)}
-                  className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer"
+          {/* Auth Section in Header */}
+          <div className="flex items-center gap-3">
+            {isLoggedIn ? (
+              <div className="flex items-center gap-3 select-none">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="text-sm font-bold border-gray-250 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all h-fit cursor-pointer flex items-center gap-1.5"
                 >
-                  <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-extrabold text-xs shrink-0 uppercase">
-                    {session?.user?.name?.charAt(0) || "U"}
-                  </div>
-                  <span className="text-sm font-bold text-gray-700 max-w-30 truncate hidden sm:inline">
-                    {session?.user?.name}
-                  </span>
-                  <MoreVertical size={13} className="text-gray-400" />
-                </button>
+                  <Link href="/dashboard">
+                    <span>Go to dashboard</span>
+                  </Link>
+                </Button>
 
-                {showHeaderUserMenu && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                    <div className="px-3 py-2 border-b border-gray-100 text-xs text-gray-500 font-semibold truncate">
-                      Logged in as{" "}
-                      <strong className="text-gray-700 block mt-0.5 truncate">{session?.user?.name}</strong>
+                {/* User Dropdown */}
+                <div ref={headerUserMenuRef} className="relative">
+                  <button
+                    onClick={() => setShowHeaderUserMenu(!showHeaderUserMenu)}
+                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-extrabold text-xs shrink-0 uppercase">
+                      {session?.user?.name?.charAt(0) || "U"}
                     </div>
-                    <button
-                      onClick={() => signOut({ callbackUrl: "/" })}
-                      className="w-full text-left px-3.5 py-2.5 text-xs text-red-650 hover:bg-red-50 hover:text-red-750 transition-colors flex items-center gap-2 cursor-pointer font-bold"
-                    >
-                      <LogOut size={13} />
-                      <span>Log Out</span>
-                    </button>
-                  </div>
-                )}
+                    <span className="text-sm font-bold text-gray-700 max-w-30 truncate hidden sm:inline">
+                      {session?.user?.name}
+                    </span>
+                    <MoreVertical size={13} className="text-gray-400" />
+                  </button>
+
+                  {showHeaderUserMenu && (
+                    <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                      <div className="px-3 py-2 border-b border-gray-100 text-xs text-gray-500 font-semibold truncate">
+                        Logged in as{" "}
+                        <strong className="text-gray-700 block mt-0.5 truncate">{session?.user?.name}</strong>
+                      </div>
+                      <button
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="w-full text-left px-3.5 py-2.5 text-xs text-red-650 hover:bg-red-50 hover:text-red-750 transition-colors flex items-center gap-2 cursor-pointer font-bold"
+                      >
+                        <LogOut size={13} />
+                        <span>Log Out</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                asChild
-                className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 cursor-pointer"
-              >
-                <Link href="/login">Sign In</Link>
-              </Button>
-              <Button
-                asChild
-                className="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 px-5 py-2.5 rounded-xl transition-all duration-200 h-fit cursor-pointer"
-              >
-                <Link href="/signup">Sign Up</Link>
-              </Button>
-            </div>
-          )}
+            ) : (
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  asChild
+                  className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 cursor-pointer"
+                >
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button
+                  asChild
+                  className="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 px-5 py-2.5 rounded-xl transition-all duration-200 h-fit cursor-pointer"
+                >
+                  <Link href="/signup">Sign Up</Link>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
