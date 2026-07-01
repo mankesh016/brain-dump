@@ -180,7 +180,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
             </div>
             <div className="space-y-1">
               <h3 className="font-bold text-sm text-gray-800">Chat with your Brain</h3>
-              <p className="text-xs text-gray-400 max-w-[240px]">
+              <p className="text-xs text-gray-400 max-w-60">
                 Ask questions to find, summarize, or query information in your notes and links.
               </p>
             </div>
@@ -231,7 +231,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                             className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-white border border-gray-200 text-[10px] text-gray-650 font-bold shadow-xs w-fit"
                           >
                             <span>📄</span>
-                            <span className="truncate max-w-[220px]">{src}</span>
+                            <span className="truncate max-w-55">{src}</span>
                           </div>
                         ))}
                       </div>
