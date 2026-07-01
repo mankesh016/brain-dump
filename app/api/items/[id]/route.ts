@@ -4,8 +4,6 @@ import axios from "axios";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-const DEV_USER_ID = process.env.DEV_USER_ID!;
-
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);

@@ -1,5 +1,6 @@
 "use client";
 import { AddDialog } from "@/components/dashboard/AddDialog";
+import { ChatSidebar } from "@/components/dashboard/ChatSidebar";
 import { DeleteDialog } from "@/components/dashboard/DeleteDialog";
 import { EditDialog } from "@/components/dashboard/EditDialog";
 import { ItemCard } from "@/components/dashboard/ItemCard";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import axios from "axios";
-import { LogOut, Search } from "lucide-react";
+import { LogOut, Search, Sparkles } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 
@@ -23,6 +24,7 @@ export default function DashboardPage() {
   const [activeFilter, setActiveFilter] = useState("all");
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   const [counts, setCounts] = useState<Record<string, number>>({
     NOTE: 0,
@@ -141,7 +143,7 @@ export default function DashboardPage() {
   );
 
   return (
-    <div className="flex min-h-screen bg-gray-50/50">
+    <div className="flex h-screen bg-gray-50/50 overflow-hidden">
       {/* 1. Sidebar */}
       <aside className="w-60 bg-white border-r border-gray-200 h-screen fixed top-0 left-0 flex flex-col p-4 z-20">
         <div className="flex items-center gap-2 px-2 py-3 mb-6">
@@ -177,7 +179,7 @@ export default function DashboardPage() {
       </aside>
 
       {/* 2. Main content area wrapper */}
-      <div className="ml-60 flex-1 flex flex-col min-h-screen">
+      <div className="ml-60 flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Bar */}
         <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-10 gap-4">
           {/* Search container */}
@@ -230,13 +232,27 @@ export default function DashboardPage() {
               <LogOut size={13} />
               <span>Sign Out</span>
             </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className={`text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5 h-fit shadow-none shrink-0 ${
+                isChatOpen
+                  ? "bg-indigo-650 text-white hover:bg-indigo-750 border-indigo-650"
+                  : "text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
+              }`}
+            >
+              <Sparkles size={13} />
+              <span>AI Assistant</span>
+            </Button>
+
             {/* shadcn Dialog modal wrapper */}
             <AddDialog onAddSuccess={fetchItems} />
           </div>
         </header>
 
         {/* Content body container */}
-        <main className="p-6 flex-1 flex flex-col">
+        <main className="p-6 flex-1 flex flex-col overflow-y-auto">
           {/* Search results latency & count stats */}
           {query.trim() && !isLoading && (
             <div className="mb-4 text-xs text-gray-500 font-semibold px-1">
@@ -252,7 +268,9 @@ export default function DashboardPage() {
 
           {/* Cards list grid */}
           {isLoading ? (
-            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+            <div
+              className={`columns-1 sm:columns-2 md:columns-3 ${isChatOpen ? "lg:columns-3" : "lg:columns-4"} gap-4 space-y-4`}
+            >
               {Array.from({ length: 8 }).map((_, i) => (
                 <SkeletonCard key={i} />
               ))}
@@ -263,7 +281,9 @@ export default function DashboardPage() {
               <span className="text-xs text-gray-400">Add a new item or adjust your search filter</span>
             </div>
           ) : (
-            <div className="columns-1 sm:columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
+            <div
+              className={`columns-1 sm:columns-2 md:columns-3 ${isChatOpen ? "lg:columns-3" : "lg:columns-4"} gap-4 space-y-4`}
+            >
               {displayedItems.map((item) => (
                 <ItemCard key={item.id} item={item} onEdit={setEditItem} onDeleteTrigger={setDeleteItemId} />
               ))}
@@ -271,6 +291,9 @@ export default function DashboardPage() {
           )}
         </main>
       </div>
+
+      {/* AI Chat Sidebar */}
+      <ChatSidebar isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* 3. Edit Item Dialog Modal */}
       <EditDialog item={editItem} onClose={() => setEditItem(null)} onEditSuccess={fetchItems} />
