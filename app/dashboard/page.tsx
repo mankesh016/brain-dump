@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SIDEBAR_ITEMS } from "@/lib/constants";
 import axios from "axios";
-import { LogOut, Search, Sparkles } from "lucide-react";
+import { Brain, LogOut, MoreVertical, Search, Sparkles, User } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useState, useEffect, useRef } from "react";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
@@ -25,6 +26,22 @@ export default function DashboardPage() {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setShowUserMenu(false);
+      }
+    }
+    if (showUserMenu) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showUserMenu]);
 
   const [counts, setCounts] = useState<Record<string, number>>({
     NOTE: 0,
@@ -146,9 +163,15 @@ export default function DashboardPage() {
     <div className="flex h-screen bg-gray-50/50 overflow-hidden">
       {/* 1. Sidebar */}
       <aside className="w-60 bg-white border-r border-gray-200 h-screen fixed top-0 left-0 flex flex-col p-4 z-20">
-        <div className="flex items-center gap-2 px-2 py-3 mb-6">
-          <span className="font-bold text-lg text-gray-800">Brain Dump</span>
-        </div>
+        <Link
+          href="/"
+          className="flex items-center gap-2.5 px-2 py-3 mb-6 hover:opacity-90 transition-all duration-200 select-none"
+        >
+          <div className="p-1.5 bg-blue-600 rounded-lg shadow-md shadow-blue-500/20 flex items-center justify-center shrink-0">
+            <Brain size={16} className="text-white" />
+          </div>
+          <span className="font-extrabold text-md text-gray-800 tracking-tight">Brain Dump</span>
+        </Link>
 
         <nav className="flex-1 space-y-1">
           {SIDEBAR_ITEMS.map((item) => {
@@ -161,7 +184,7 @@ export default function DashboardPage() {
               <button
                 key={item.name}
                 onClick={() => setActiveFilter(item.filter)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-left ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors text-left cursor-pointer ${
                   isActive
                     ? "bg-blue-50 text-blue-600 font-semibold"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
@@ -176,6 +199,39 @@ export default function DashboardPage() {
             );
           })}
         </nav>
+
+        {/* Sidebar bottom user section */}
+        {session?.user && (
+          <div ref={userMenuRef} className="mt-auto pt-4 border-t border-gray-200 relative select-none">
+            {showUserMenu && (
+              <div className="absolute bottom-16 right-0 left-0 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-30 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                <button
+                  onClick={() => signOut({ callbackUrl: "/login" })}
+                  className="w-full text-left px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors flex items-center gap-2 cursor-pointer font-bold"
+                >
+                  <LogOut size={13} />
+                  <span>Log Out</span>
+                </button>
+              </div>
+            )}
+            <div className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-gray-50/70 transition-colors">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-150 flex items-center justify-center shrink-0">
+                  <User size={15} />
+                </div>
+                <span className="text-xs font-bold text-gray-700 truncate max-w-28" title={session.user.name ?? ""}>
+                  {session.user.name}
+                </span>
+              </div>
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="text-gray-400 hover:text-gray-650 p-1.5 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer shrink-0"
+              >
+                <MoreVertical size={14} />
+              </button>
+            </div>
+          </div>
+        )}
       </aside>
 
       {/* 2. Main content area wrapper */}
@@ -219,20 +275,6 @@ export default function DashboardPage() {
 
           {/* Action buttons */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Real Session user display */}
-            {session?.user?.name && (
-              <span className="text-xs font-bold text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg border border-gray-250/60">
-                {session.user.name}
-              </span>
-            )}
-            <Button
-              onClick={() => signOut({ callbackUrl: "/login" })}
-              className="text-xs font-bold text-red-650 hover:text-red-750 bg-red-50 hover:bg-red-100 border border-red-200 px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5 h-fit shadow-none"
-            >
-              <LogOut size={13} />
-              <span>Sign Out</span>
-            </Button>
-
             <Button
               variant="outline"
               onClick={() => setIsChatOpen(!isChatOpen)}
