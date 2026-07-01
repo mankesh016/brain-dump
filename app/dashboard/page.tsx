@@ -13,9 +13,9 @@ import { Brain, LogOut, Moon, MoreVertical, Search, Sparkles, Sun, User } from "
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 
-export default function DashboardPage() {
+function DashboardPageContent() {
   const { data: session } = useSession();
   const [items, setItems] = useState<any[]>([]);
 
@@ -388,5 +388,15 @@ export default function DashboardPage() {
       {/* 4. Delete Item AlertDialog */}
       <DeleteDialog itemId={deleteItemId} onClose={() => setDeleteItemId(null)} onDeleteConfirm={deleteItem} />
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={<div className="p-8 text-center text-xs font-bold text-gray-400">Loading your workspace...</div>}
+    >
+      <DashboardPageContent />
+    </Suspense>
   );
 }
