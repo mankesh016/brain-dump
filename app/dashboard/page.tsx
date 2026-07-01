@@ -12,6 +12,7 @@ import axios from "axios";
 import { Brain, LogOut, MoreVertical, Search, Sparkles, User } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 
 export default function DashboardPage() {
@@ -27,7 +28,15 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get("add") === "true") {
+      setIsAddOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -289,7 +298,7 @@ export default function DashboardPage() {
             </Button>
 
             {/* shadcn Dialog modal wrapper */}
-            <AddDialog onAddSuccess={fetchItems} />
+            <AddDialog open={isAddOpen} onOpenChange={setIsAddOpen} onAddSuccess={fetchItems} />
           </div>
         </header>
 

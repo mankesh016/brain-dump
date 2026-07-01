@@ -7,11 +7,16 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
 
 interface AddDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onAddSuccess: () => void | Promise<void>;
 }
 
-export function AddDialog({ onAddSuccess }: AddDialogProps) {
-  const [isAddOpen, setIsAddOpen] = useState(false);
+export function AddDialog({ open, onOpenChange, onAddSuccess }: AddDialogProps) {
+  const [localOpen, setLocalOpen] = useState(false);
+  const isAddOpen = open !== undefined ? open : localOpen;
+  const setIsAddOpen = onOpenChange !== undefined ? onOpenChange : setLocalOpen;
+
   const [isAdding, setIsAdding] = useState(false);
   const [addError, setAddError] = useState("");
   const [isGeneratingTitle, setIsGeneratingTitle] = useState(false);
