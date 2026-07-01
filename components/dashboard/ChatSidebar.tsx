@@ -8,6 +8,57 @@ interface ChatSidebarProps {
   onClose: () => void;
 }
 
+function renderFormattedMessage(text: string) {
+  const lines = text.split("\n");
+
+  return lines.map((line, lineIdx) => {
+    let cleanLine = line.trim();
+
+    // Check for bullet lists
+    const isBullet = cleanLine.startsWith("- ") || cleanLine.startsWith("* ");
+    if (isBullet) {
+      cleanLine = cleanLine.substring(2);
+    }
+
+    // Parse bold text (**bold**)
+    const parts = [];
+    let currentIdx = 0;
+    const regex = /\*\*(.*?)\*\*/g;
+    let match;
+
+    while ((match = regex.exec(cleanLine)) !== null) {
+      if (match.index > currentIdx) {
+        parts.push(cleanLine.substring(currentIdx, match.index));
+      }
+      parts.push(
+        <strong key={match.index} className="font-bold text-gray-900">
+          {match[1]}
+        </strong>,
+      );
+      currentIdx = regex.lastIndex;
+    }
+
+    if (currentIdx < cleanLine.length) {
+      parts.push(cleanLine.substring(currentIdx));
+    }
+
+    if (isBullet) {
+      return (
+        <div key={lineIdx} className="flex gap-2 pl-2 py-0.5 items-start">
+          <span className="text-indigo-500 font-bold shrink-0">•</span>
+          <span className="flex-1">{parts}</span>
+        </div>
+      );
+    }
+
+    return (
+      <p key={lineIdx} className={line.trim() === "" ? "h-2" : "py-0.5"}>
+        {parts}
+      </p>
+    );
+  });
+}
+
 export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
   const [messages, setMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
   const [input, setInput] = useState("");
@@ -162,7 +213,14 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                       : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"
                   }`}
                 >
-                  <div className="whitespace-pre-wrap select-text">{text}</div>
+                  <div className="select-text space-y-1">
+                    {m.role === "user" ? (
+                      <div className="whitespace-pre-wrap">{text}</div>
+                    ) : (
+                      renderFormattedMessage(text)
+                    )}
+                  </div>
+
                   {sources.length > 0 && (
                     <div className="mt-3 pt-2.5 border-t border-gray-200/70 space-y-1.5 shrink-0 select-text">
                       <div className="text-[9px] font-bold text-gray-450 tracking-wider">CITED SOURCES:</div>
