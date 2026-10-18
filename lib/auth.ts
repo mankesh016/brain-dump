@@ -16,9 +16,15 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await db.user.findUnique({
-          where: { username: credentials.username },
-        });
+        // Prefer an exact match so legacy accounts differing only by case keep working,
+        // then fall back to a case-insensitive lookup
+        const user =
+          (await db.user.findUnique({
+            where: { username: credentials.username },
+          })) ??
+          (await db.user.findFirst({
+            where: { username: { equals: credentials.username, mode: "insensitive" } },
+          }));
 
         if (!user) {
           return null;

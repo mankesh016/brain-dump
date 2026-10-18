@@ -204,7 +204,7 @@ export function EditDialog({ item, onClose, onEditSuccess }: EditDialogProps) {
           <Button
             onClick={updateItem}
             disabled={!canSubmit || isUpdating}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-on-accent mt-2"
           >
             {isUpdating ? "Saving..." : "Save Changes"}
           </Button>

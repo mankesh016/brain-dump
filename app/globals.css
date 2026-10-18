@@ -50,6 +50,8 @@ html.dark {
   --font-mono: var(--font-geist-mono);
 
   --color-white: var(--white);
+  /* Text on accent-colored backgrounds; stays white in both themes */
+  --color-on-accent: #ffffff;
   --color-gray-50: var(--gray-50);
   --color-gray-100: var(--gray-100);
   --color-gray-150: var(--gray-150);

@@ -113,89 +113,91 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen bg-white text-gray-900 font-sans selection:bg-blue-100 selection:text-blue-700">
       {/* 1. Header / Navigation */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 flex items-center justify-between px-6 md:px-12 max-w-7xl mx-auto w-full">
-        {/* Brand Logo */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <div className="p-2 bg-blue-600 rounded-xl shadow-md shadow-blue-500/10">
-            <Brain size={20} className="text-white" />
-          </div>
-          <span className="font-extrabold text-lg text-gray-900 tracking-tight">Brain Dump</span>
-        </Link>
+      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50">
+        <div className="h-full max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
+          {/* Brand Logo */}
+          <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <div className="p-2 bg-blue-600 rounded-xl shadow-md shadow-blue-500/10">
+              <Brain size={20} className="text-on-accent" />
+            </div>
+            <span className="font-extrabold text-lg text-gray-900 tracking-tight">Brain Dump</span>
+          </Link>
 
-        {/* Right Header Actions */}
-        <div className="flex items-center gap-3.5">
-          {/* Dark Mode Toggle Button */}
-          <button
-            onClick={toggleDarkMode}
-            className="p-2.5 rounded-xl border border-gray-250/70 bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer text-gray-500 hover:text-gray-800 shrink-0 flex items-center justify-center"
-            aria-label="Toggle dark mode"
-          >
-            {isDark ? <Sun size={17} className="text-amber-500" /> : <Moon size={17} />}
-          </button>
+          {/* Right Header Actions */}
+          <div className="flex items-center gap-3.5">
+            {/* Dark Mode Toggle Button */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2.5 rounded-xl border border-gray-250/70 bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer text-gray-500 hover:text-gray-800 shrink-0 flex items-center justify-center"
+              aria-label="Toggle dark mode"
+            >
+              {isDark ? <Sun size={17} className="text-amber-500" /> : <Moon size={17} />}
+            </button>
 
-          {/* Auth Section in Header */}
-          <div className="flex items-center gap-3">
-            {isLoggedIn ? (
-              <div className="flex items-center gap-3 select-none">
-                <Button
-                  asChild
-                  variant="outline"
-                  className="text-sm font-bold border-gray-250 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all h-fit cursor-pointer flex items-center gap-1.5"
-                >
-                  <Link href="/dashboard">
-                    <span>Go to dashboard</span>
-                  </Link>
-                </Button>
-
-                {/* User Dropdown */}
-                <div ref={headerUserMenuRef} className="relative">
-                  <button
-                    onClick={() => setShowHeaderUserMenu(!showHeaderUserMenu)}
-                    className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer"
+            {/* Auth Section in Header */}
+            <div className="flex items-center gap-3">
+              {isLoggedIn ? (
+                <div className="flex items-center gap-3 select-none">
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="text-sm font-bold border-gray-250 hover:bg-gray-50 px-4 py-2 rounded-xl transition-all h-fit cursor-pointer flex items-center gap-1.5"
                   >
-                    <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-extrabold text-xs shrink-0 uppercase">
-                      {session?.user?.name?.charAt(0) || "U"}
-                    </div>
-                    <span className="text-sm font-bold text-gray-700 max-w-30 truncate hidden sm:inline">
-                      {session?.user?.name}
-                    </span>
-                    <MoreVertical size={13} className="text-gray-400" />
-                  </button>
+                    <Link href="/dashboard">
+                      <span>Go to dashboard</span>
+                    </Link>
+                  </Button>
 
-                  {showHeaderUserMenu && (
-                    <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
-                      <div className="px-3 py-2 border-b border-gray-100 text-xs text-gray-500 font-semibold truncate">
-                        Logged in as{" "}
-                        <strong className="text-gray-700 block mt-0.5 truncate">{session?.user?.name}</strong>
+                  {/* User Dropdown */}
+                  <div ref={headerUserMenuRef} className="relative">
+                    <button
+                      onClick={() => setShowHeaderUserMenu(!showHeaderUserMenu)}
+                      className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <div className="w-7 h-7 rounded-full bg-blue-600 text-on-accent flex items-center justify-center font-extrabold text-xs shrink-0 uppercase">
+                        {session?.user?.name?.charAt(0) || "U"}
                       </div>
-                      <button
-                        onClick={() => signOut({ callbackUrl: "/" })}
-                        className="w-full text-left px-3.5 py-2.5 text-xs text-red-650 hover:bg-red-50 hover:text-red-750 transition-colors flex items-center gap-2 cursor-pointer font-bold"
-                      >
-                        <LogOut size={13} />
-                        <span>Log Out</span>
-                      </button>
-                    </div>
-                  )}
+                      <span className="text-sm font-bold text-gray-700 max-w-30 truncate hidden sm:inline">
+                        {session?.user?.name}
+                      </span>
+                      <MoreVertical size={13} className="text-gray-400" />
+                    </button>
+
+                    {showHeaderUserMenu && (
+                      <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-50 animate-in fade-in slide-in-from-bottom-2 duration-150">
+                        <div className="px-3 py-2 border-b border-gray-100 text-xs text-gray-500 font-semibold truncate">
+                          Logged in as{" "}
+                          <strong className="text-gray-700 block mt-0.5 truncate">{session?.user?.name}</strong>
+                        </div>
+                        <button
+                          onClick={() => signOut({ callbackUrl: "/" })}
+                          className="w-full text-left px-3.5 py-2.5 text-xs text-red-650 hover:bg-red-50 hover:text-red-750 transition-colors flex items-center gap-2 cursor-pointer font-bold"
+                        >
+                          <LogOut size={13} />
+                          <span>Log Out</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="ghost"
-                  asChild
-                  className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 cursor-pointer"
-                >
-                  <Link href="/login">Sign In</Link>
-                </Button>
-                <Button
-                  asChild
-                  className="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 px-5 py-2.5 rounded-xl transition-all duration-200 h-fit cursor-pointer"
-                >
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
-              </div>
-            )}
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors px-4 py-2 cursor-pointer"
+                  >
+                    <Link href="/login">Sign In</Link>
+                  </Button>
+                  <Button
+                    asChild
+                    className="text-sm font-bold text-on-accent bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 px-5 py-2.5 rounded-xl transition-all duration-200 h-fit cursor-pointer"
+                  >
+                    <Link href="/signup">Sign Up</Link>
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -242,7 +244,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-16 w-full sm:w-auto">
             <Button
               asChild
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-6 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all duration-200 h-fit cursor-pointer text-base"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-on-accent font-bold px-8 py-6 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all duration-200 h-fit cursor-pointer text-base"
             >
               <Link href="/dashboard">
                 <span>Go to dashboard</span>
@@ -264,7 +266,7 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row items-center gap-4 mb-16 w-full sm:w-auto">
             <Button
               asChild
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold px-8 py-6 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all duration-200 h-fit cursor-pointer text-base"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-on-accent font-bold px-8 py-6 rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 transition-all duration-200 h-fit cursor-pointer text-base"
             >
               <Link href="/signup">
                 <span>Get Started Free</span>

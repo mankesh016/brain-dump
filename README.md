@@ -15,7 +15,7 @@ Username: `testuser` · Password: `testpass`
 - **Generate title** — paste a URL, auto-fetch the page title
 - **RAG-powered AI chat** — ask questions in natural language, get answers synthesized from your saved items
 - **Dark / Light theme** — persists across sessions
-- **One-click demo access** — no signup needed to explore
+- **Demo account** — sign in with the credentials above to explore
 
 ---
 
@@ -107,7 +107,6 @@ DATABASE_URL=           # PostgreSQL connection string
 GEMINI_API_KEY=         # Google AI Studio API key
 NEXTAUTH_SECRET=        # Random string: openssl rand -base64 32
 NEXTAUTH_URL=           # http://localhost:3000 (local) or your deployed URL
-DEV_USER_ID=            # dev-user-123 (only used in local dev)
 ```
 
 ---

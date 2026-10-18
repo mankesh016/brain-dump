@@ -194,7 +194,7 @@ function DashboardPageContent() {
           className="flex items-center gap-2.5 px-2 py-3 mb-6 hover:opacity-90 transition-all duration-200 select-none"
         >
           <div className="p-1.5 bg-blue-600 rounded-lg shadow-md shadow-blue-500/20 flex items-center justify-center shrink-0">
-            <Brain size={16} className="text-white" />
+            <Brain size={16} className="text-on-accent" />
           </div>
           <span className="font-extrabold text-md text-gray-800 tracking-tight">Brain Dump</span>
         </Link>
@@ -325,7 +325,7 @@ function DashboardPageContent() {
               onClick={() => setIsChatOpen(!isChatOpen)}
               className={`text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200 flex items-center gap-1.5 h-fit shadow-none shrink-0 ${
                 isChatOpen
-                  ? "bg-indigo-650 text-white hover:bg-indigo-750 border-indigo-650"
+                  ? "bg-indigo-650 text-on-accent hover:bg-indigo-750 border-indigo-650"
                   : "text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200"
               }`}
             >

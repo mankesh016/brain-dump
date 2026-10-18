@@ -119,7 +119,7 @@ export function AddDialog({ open, onOpenChange, onAddSuccess }: AddDialogProps) 
 
   return (
     <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-      <DialogTrigger className="bg-blue-600 hover:bg-blue-700 text-white gap-1.5 h-9 inline-flex items-center justify-center rounded-lg px-3.5 text-sm font-medium shadow-sm cursor-pointer border border-transparent shrink-0">
+      <DialogTrigger className="bg-blue-600 hover:bg-blue-700 text-on-accent gap-1.5 h-9 inline-flex items-center justify-center rounded-lg px-3.5 text-sm font-medium shadow-sm cursor-pointer border border-transparent shrink-0">
         <Plus size={16} />
         <span>Add Item</span>
       </DialogTrigger>
@@ -199,7 +199,7 @@ export function AddDialog({ open, onOpenChange, onAddSuccess }: AddDialogProps) 
           <Button
             onClick={addItem}
             disabled={!canSubmit || isAdding}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white mt-2"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-on-accent mt-2"
           >
             {isAdding ? "Adding..." : "Add Item"}
           </Button>

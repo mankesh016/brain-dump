@@ -30,7 +30,7 @@ export function DeleteDialog({ itemId, onClose, onDeleteConfirm }: DeleteDialogP
           <AlertDialogCancel onClick={onClose}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={onDeleteConfirm}
-            className="bg-red-600 hover:bg-red-700 text-white cursor-pointer"
+            className="bg-red-600 hover:bg-red-700 text-on-accent cursor-pointer"
           >
             Delete
           </AlertDialogAction>

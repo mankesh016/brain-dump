@@ -3,8 +3,6 @@ import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-const DEV_USER_ID = process.env.DEV_USER_ID!;
-
 export async function GET() {
   try {
     const session = await getServerSession(authOptions);

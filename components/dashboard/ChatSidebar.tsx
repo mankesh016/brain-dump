@@ -151,8 +151,6 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
     return { text, sources };
   }
 
-  const sampleQuestions = ["What did i recently add?", "tell me about database i used", "summarize youtube links"];
-
   if (!isOpen) return null;
 
   return (
@@ -185,18 +183,6 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
               </p>
             </div>
 
-            {/* Sample Questions */}
-            <div className="w-full pt-4 space-y-2">
-              {sampleQuestions.map((q, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => sendMessage(q)}
-                  className="w-full text-left text-xs text-indigo-650 bg-indigo-50/50 hover:bg-indigo-100/70 border border-indigo-100/50 rounded-xl p-3 transition-all duration-200 cursor-pointer font-semibold"
-                >
-                  {q}
-                </button>
-              ))}
-            </div>
           </div>
         ) : (
           messages.map((m, index) => {
@@ -209,7 +195,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
                 <div
                   className={`max-w-[90%] rounded-2xl px-4 py-2.5 text-xs leading-relaxed ${
                     m.role === "user"
-                      ? "bg-indigo-600 text-white rounded-br-none"
+                      ? "bg-indigo-600 text-on-accent rounded-br-none"
                       : "bg-gray-100 text-gray-800 rounded-bl-none border border-gray-200"
                   }`}
                 >
@@ -267,7 +253,7 @@ export function ChatSidebar({ isOpen, onClose }: ChatSidebarProps) {
             type="submit"
             disabled={isThinking || isStreaming || !input.trim()}
             size="icon"
-            className="bg-indigo-650 hover:bg-indigo-750 text-white cursor-pointer h-9 w-9"
+            className="bg-indigo-650 hover:bg-indigo-750 text-on-accent cursor-pointer h-9 w-9"
           >
             <Send size={14} />
           </Button>

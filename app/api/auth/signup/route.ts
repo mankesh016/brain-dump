@@ -10,6 +10,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
     }
 
+    if (typeof username !== "string" || typeof password !== "string") {
+      return NextResponse.json({ error: "Username and password must be strings" }, { status: 400 });
+    }
+
     const trimmedUsername = username.trim();
     if (trimmedUsername.length < 3) {
       return NextResponse.json({ error: "Username must be at least 3 characters long" }, { status: 400 });
@@ -19,9 +23,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Password must be at least 6 characters long" }, { status: 400 });
     }
 
-    // Check if username already exists
-    const existingUser = await db.user.findUnique({
-      where: { username: trimmedUsername },
+    // Check if username already exists (case-insensitive)
+    const existingUser = await db.user.findFirst({
+      where: { username: { equals: trimmedUsername, mode: "insensitive" } },
     });
 
     if (existingUser) {

@@ -2,19 +2,43 @@
 
 import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import { Brain, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function LoginPage() {
+const DEFAULT_REDIRECT = "/dashboard";
+
+const AUTH_ERROR_MESSAGES: Record<string, string> = {
+  CredentialsSignin: "Invalid username or password",
+  SessionRequired: "Please sign in to continue",
+};
+
+function getAuthErrorMessage(code: string) {
+  return AUTH_ERROR_MESSAGES[code] ?? "Something went wrong while signing in. Please try again.";
+}
+
+// Only allow redirects back into this app, never to another origin
+function getSafeCallbackUrl(raw: string | null) {
+  if (!raw) return DEFAULT_REDIRECT;
+  try {
+    const url = new URL(raw, window.location.origin);
+    if (url.origin !== window.location.origin) return DEFAULT_REDIRECT;
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return DEFAULT_REDIRECT;
+  }
+}
+
+function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const errorParam = searchParams.get("error");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState(errorParam ? getAuthErrorMessage(errorParam) : "");
   const [isLoading, setIsLoading] = useState(false);
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,9 +57,9 @@ export default function LoginPage() {
       });
 
       if (res?.error) {
-        setError("Invalid username or password");
+        setError(getAuthErrorMessage(res.error));
       } else {
-        router.push("/dashboard");
+        router.push(getSafeCallbackUrl(searchParams.get("callbackUrl")));
       }
     } catch (err) {
       setError("An unexpected error occurred");
@@ -44,52 +68,32 @@ export default function LoginPage() {
     }
   };
 
-  const handleDemoAccess = async () => {
-    setError("");
-    setIsDemoLoading(true);
-    try {
-      const res = await signIn("credentials", {
-        username: "testuser",
-        password: "testpass",
-        redirect: false, // ensure don't redirect on error
-      });
-
-      if (res?.error) {
-        setError("Failed to log in to demo account");
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err) {
-      setError("An unexpected error occurred");
-    } finally {
-      setIsDemoLoading(false);
-    }
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center p-6 bg-gray-50 font-sans pt-24">
       {/* Navigation Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 flex items-center justify-between px-6 md:px-12 max-w-7xl mx-auto w-full">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <div className="p-2 bg-blue-600 rounded-xl shadow-md shadow-blue-500/10">
-            <Brain size={20} className="text-white" />
+      <header className="fixed top-0 left-0 right-0 h-16 bg-gray-50/80 backdrop-blur-md border-b border-gray-100 z-50">
+        <div className="h-full max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <div className="p-2 bg-blue-600 rounded-xl shadow-md shadow-blue-500/10">
+              <Brain size={20} className="text-on-accent" />
+            </div>
+            <span className="font-extrabold text-lg text-gray-900 tracking-tight">Brain Dump</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              asChild
+              className="text-sm font-semibold text-gray-600 hover:text-gray-950 transition-colors px-4 py-2 cursor-pointer"
+            >
+              <Link href="/login">Sign In</Link>
+            </Button>
+            <Button
+              asChild
+              className="text-sm font-bold text-on-accent bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 px-5 py-2.5 rounded-xl transition-all duration-200 h-fit cursor-pointer"
+            >
+              <Link href="/signup">Sign Up</Link>
+            </Button>
           </div>
-          <span className="font-extrabold text-lg text-gray-900 tracking-tight">Brain Dump</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            asChild
-            className="text-sm font-semibold text-gray-600 hover:text-gray-950 transition-colors px-4 py-2 cursor-pointer"
-          >
-            <Link href="/login">Sign In</Link>
-          </Button>
-          <Button
-            asChild
-            className="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 px-5 py-2.5 rounded-xl transition-all duration-200 h-fit cursor-pointer"
-          >
-            <Link href="/signup">Sign Up</Link>
-          </Button>
         </div>
       </header>
 
@@ -142,8 +146,8 @@ export default function LoginPage() {
 
           <Button
             type="submit"
-            disabled={isLoading || isDemoLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2 h-fit"
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-on-accent font-medium text-sm py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2 h-fit"
           >
             {isLoading && <Loader2 size={16} className="animate-spin" />}
             <span>Sign In</span>
@@ -151,24 +155,6 @@ export default function LoginPage() {
 
           {error && <p className="text-xs text-red-500 text-center font-medium mt-1">{error}</p>}
         </form>
-
-        <div className="relative flex py-1 items-center">
-          <div className="grow border-t border-gray-200"></div>
-          <span className="shrink mx-4 text-[10px] text-gray-455 font-semibold uppercase tracking-wider">
-            Want to test the app?
-          </span>
-          <div className="grow border-t border-gray-200"></div>
-        </div>
-
-        <Button
-          type="button"
-          onClick={handleDemoAccess}
-          disabled={isLoading || isDemoLoading}
-          className="w-full bg-amber-50 hover:bg-amber-100/80 disabled:opacity-50 text-amber-700 border border-amber-200 font-bold text-sm py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 h-fit shadow-none"
-        >
-          {isDemoLoading && <Loader2 size={16} className="animate-spin" />}
-          <span>⚡ One-Click Demo Access</span>
-        </Button>
 
         <div className="text-center text-xs text-gray-500">
           Don't have an account?{" "}
@@ -178,5 +164,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs font-bold text-gray-400">Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

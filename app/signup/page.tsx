@@ -15,7 +15,6 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isDemoLoading, setIsDemoLoading] = useState(false);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,63 +55,51 @@ export default function SignupPage() {
       }
 
       // Auto signIn on success
-      await signIn("credentials", {
+      const res = await signIn("credentials", {
         username: username.trim(),
         password,
-        callbackUrl: "/dashboard",
+        redirect: false,
       });
+
+      if (res?.error) {
+        setError("Account created, but we couldn't sign you in. Please sign in manually.");
+        setIsLoading(false);
+        return;
+      }
+
+      router.push("/dashboard");
     } catch (err) {
       setError("An unexpected error occurred during signup");
       setIsLoading(false);
     }
   };
 
-  const handleDemoAccess = async () => {
-    setError("");
-    setIsDemoLoading(true);
-    try {
-      const res = await signIn("credentials", {
-        username: "testuser",
-        password: "testpass",
-        redirect: false, // ensure don't redirect on error
-      });
-
-      if (res?.error) {
-        setError("Failed to log in to demo account");
-      } else {
-        router.push("/dashboard");
-      }
-    } catch (err) {
-      setError("An unexpected error occurred");
-    } finally {
-      setIsDemoLoading(false);
-    }
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center p-6 bg-gray-50 font-sans pt-24">
       {/* Navigation Header */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 z-50 flex items-center justify-between px-6 md:px-12 max-w-7xl mx-auto w-full">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <div className="p-2 bg-blue-600 rounded-xl shadow-md shadow-blue-500/10">
-            <Brain size={20} className="text-white" />
+      <header className="fixed top-0 left-0 right-0 h-16 bg-gray-50/80 backdrop-blur-md border-b border-gray-100 z-50">
+        <div className="h-full max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+            <div className="p-2 bg-blue-600 rounded-xl shadow-md shadow-blue-500/10">
+              <Brain size={20} className="text-on-accent" />
+            </div>
+            <span className="font-extrabold text-lg text-gray-900 tracking-tight">Brain Dump</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="ghost"
+              asChild
+              className="text-sm font-semibold text-gray-600 hover:text-gray-955 transition-colors px-4 py-2 cursor-pointer"
+            >
+              <Link href="/login">Sign In</Link>
+            </Button>
+            <Button
+              asChild
+              className="text-sm font-bold text-on-accent bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 px-5 py-2.5 rounded-xl transition-all duration-200 h-fit cursor-pointer"
+            >
+              <Link href="/signup">Sign Up</Link>
+            </Button>
           </div>
-          <span className="font-extrabold text-lg text-gray-900 tracking-tight">Brain Dump</span>
-        </Link>
-        <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            asChild
-            className="text-sm font-semibold text-gray-600 hover:text-gray-955 transition-colors px-4 py-2 cursor-pointer"
-          >
-            <Link href="/login">Sign In</Link>
-          </Button>
-          <Button
-            asChild
-            className="text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 px-5 py-2.5 rounded-xl transition-all duration-200 h-fit cursor-pointer"
-          >
-            <Link href="/signup">Sign Up</Link>
-          </Button>
         </div>
       </header>
 
@@ -182,8 +169,8 @@ export default function SignupPage() {
 
           <Button
             type="submit"
-            disabled={isLoading || isDemoLoading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2 h-fit"
+            disabled={isLoading}
+            className="w-full bg-blue-600 hover:bg-blue-700 text-on-accent font-medium text-sm py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 mt-2 h-fit"
           >
             {isLoading && <Loader2 size={16} className="animate-spin" />}
             <span>Sign Up</span>
@@ -191,24 +178,6 @@ export default function SignupPage() {
 
           {error && <p className="text-xs text-red-500 text-center font-medium mt-1">{error}</p>}
         </form>
-
-        <div className="relative flex py-1 items-center">
-          <div className="grow border-t border-gray-200"></div>
-          <span className="shrink mx-4 text-[10px] text-gray-450 font-semibold uppercase tracking-wider text-center">
-            Wanna try without sign up?
-          </span>
-          <div className="grow border-t border-gray-200"></div>
-        </div>
-
-        <Button
-          type="button"
-          onClick={handleDemoAccess}
-          disabled={isLoading || isDemoLoading}
-          className="w-full bg-amber-50 hover:bg-amber-100/80 disabled:opacity-50 text-amber-700 border border-amber-200 font-bold text-sm py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1.5 h-fit shadow-none"
-        >
-          {isDemoLoading && <Loader2 size={16} className="animate-spin" />}
-          <span>⚡ Enter as Guest User</span>
-        </Button>
 
         <div className="text-center text-xs text-gray-500">
           Already have an account?{" "}
