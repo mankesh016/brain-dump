@@ -14,6 +14,8 @@
     "@google/generative-ai": "^0.24.1",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
+    "@upstash/ratelimit": "^2.2.0",
+    "@upstash/redis": "^1.39.0",
     "axios": "^1.18.1",
     "bcryptjs": "^3.0.3",
     "boxicons": "^2.1.4",

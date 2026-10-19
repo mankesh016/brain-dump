@@ -16,7 +16,8 @@ import { useSearchParams } from "next/navigation";
 import { useState, useEffect, useRef, Suspense } from "react";
 
 function DashboardPageContent() {
-  const { data: session } = useSession();
+  // Redirects to sign-in when the session ends (e.g. the user was deleted)
+  const { data: session } = useSession({ required: true });
   const [items, setItems] = useState<any[]>([]);
 
   const [query, setQuery] = useState("");

@@ -1,16 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import axios from "axios";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUserId } from "@/lib/auth";
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const userId = await getSessionUserId();
+    if (!userId) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const userId = (session.user as any).id;
 
     const { id } = await params;
     const body = await req.json();
@@ -77,11 +75,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
 export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    const userId = await getSessionUserId();
+    if (!userId) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
-    const userId = (session.user as any).id;
 
     const { id } = await params;
 

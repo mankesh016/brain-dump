@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { getSessionUserId } from "@/lib/auth";
 
 function cosineSimilarity(a: number[], b: number[]): number {
   let dotProduct = 0;
@@ -17,11 +16,10 @@ function cosineSimilarity(a: number[], b: number[]): number {
 }
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user) {
+  const userId = await getSessionUserId();
+  if (!userId) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
-  const userId = (session.user as any).id;
 
   const q = new URL(req.url).searchParams.get("q") ?? "";
   const type = new URL(req.url).searchParams.get("type") ?? "keyword";

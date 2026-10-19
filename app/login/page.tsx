@@ -12,6 +12,7 @@ const DEFAULT_REDIRECT = "/dashboard";
 const AUTH_ERROR_MESSAGES: Record<string, string> = {
   CredentialsSignin: "Invalid username or password",
   SessionRequired: "Please sign in to continue",
+  TooManyAttempts: "Too many failed sign-in attempts. Please wait 15 minutes and try again.",
 };
 
 function getAuthErrorMessage(code: string) {

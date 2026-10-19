@@ -107,6 +107,8 @@ DATABASE_URL=           # PostgreSQL connection string
 GEMINI_API_KEY=         # Google AI Studio API key
 NEXTAUTH_SECRET=        # Random string: openssl rand -base64 32
 NEXTAUTH_URL=           # http://localhost:3000 (local) or your deployed URL
+UPSTASH_REDIS_REST_URL=   # Upstash Redis REST URL (sign-in rate limiting; disabled when unset)
+UPSTASH_REDIS_REST_TOKEN= # Upstash Redis REST token
 ```
 
 ---
